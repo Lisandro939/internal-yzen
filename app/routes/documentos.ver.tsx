@@ -85,7 +85,7 @@ export default function VerDocumentoPage() {
   ] as const;
 
   return (
-    <div className="animate-fade-in w-full mt-12">
+    <div className="animate-fade-in w-full md:mt-12">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">

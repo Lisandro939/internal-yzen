@@ -105,7 +105,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="animate-fade-in mt-12">
+    <div className="animate-fade-in md:mt-12">
       {/* Migration Banner */}
       {hasLocalStorageData && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-center justify-between">
