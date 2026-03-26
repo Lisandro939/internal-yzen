@@ -29,6 +29,27 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     },
   ];
 
+  const proyectosNav = [
+    {
+      name: 'Proyectos',
+      path: '/proyectos',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        </svg>
+      ),
+    },
+    {
+      name: 'Nuevo Proyecto',
+      path: '/proyectos/crear',
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      ),
+    },
+  ];
+
   const handleLinkClick = () => {
     if (onClose) {
       onClose();
@@ -71,6 +92,30 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <span>{item.name}</span>
           </Link>
         ))}
+
+        <p className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mt-4">
+          Proyectos & Cobros
+        </p>
+        {proyectosNav.map((item) => {
+          const isActive =
+            item.path === '/proyectos/crear'
+              ? location.pathname === '/proyectos/crear'
+              : location.pathname === '/proyectos' ||
+                (location.pathname.startsWith('/proyectos/') &&
+                  location.pathname !== '/proyectos/crear');
+
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={handleLinkClick}
+              className={`sidebar-link ${isActive ? 'active' : ''}`}
+            >
+              {item.icon}
+              <span>{item.name}</span>
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Bottom Section */}

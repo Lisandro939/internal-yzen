@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import type { DocumentData } from '~/types/document';
 import { getAllDocuments, deleteDocumentFromDb, saveDocumentToDb } from '~/services/documentService';
+import { getUpcomingPayments } from '~/services/projectService';
 
 export function meta() {
   return [
@@ -16,6 +17,8 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isMigrating, setIsMigrating] = useState(false);
   const [hasLocalStorageData, setHasLocalStorageData] = useState(false);
+  const [upcomingPayments, setUpcomingPayments] = useState<Awaited<ReturnType<typeof getUpcomingPayments>>>([]);
+  const [isLoadingPayments, setIsLoadingPayments] = useState(true);
 
   const loadDocuments = async () => {
     setIsLoading(true);
@@ -24,8 +27,21 @@ export default function DashboardPage() {
     setIsLoading(false);
   };
 
+  const loadUpcomingPayments = async () => {
+    setIsLoadingPayments(true);
+    try {
+      const payments = await getUpcomingPayments(5);
+      setUpcomingPayments(payments);
+    } catch (error) {
+      console.error('Error loading upcoming payments:', error);
+    } finally {
+      setIsLoadingPayments(false);
+    }
+  };
+
   useEffect(() => {
     loadDocuments();
+    loadUpcomingPayments();
     // Check if there's data in localStorage to migrate
     const localData = localStorage.getItem('yzen_documents');
     if (localData) {
@@ -277,6 +293,63 @@ export default function DashboardPage() {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Próximos Vencimientos */}
+      <div className="card mt-8">
+        <div className="card-header flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-slate-800">Próximos Vencimientos</h2>
+            <p className="text-sm text-slate-500">Cuotas pendientes de cobro</p>
+          </div>
+          <a href="/proyectos" className="text-sm text-cyan-600 hover:text-cyan-700 font-medium">
+            Ver proyectos →
+          </a>
+        </div>
+        {isLoadingPayments ? (
+          <div className="card-body flex items-center justify-center py-16">
+            <div className="w-8 h-8 border-4 border-cyan-200 border-t-cyan-500 rounded-full animate-spin"></div>
+          </div>
+        ) : upcomingPayments.length === 0 ? (
+          <div className="card-body text-center py-8 text-slate-500">No hay cuotas pendientes</div>
+        ) : (
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Proyecto</th>
+                  <th>Cuota</th>
+                  <th>Monto</th>
+                  <th>Vencimiento</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcomingPayments.map((payment) => {
+                  const isOverdue = payment.fecha_vencimiento && new Date(payment.fecha_vencimiento) < new Date();
+                  return (
+                    <tr
+                      key={payment.id}
+                      className="cursor-pointer hover:bg-slate-50"
+                      onClick={() => navigate(`/proyectos/ver/${payment.project_id}`)}
+                    >
+                      <td className="font-semibold text-slate-800">{payment.cliente}</td>
+                      <td className="text-slate-600">{payment.nombre_proyecto}</td>
+                      <td>{payment.descripcion || `Cuota ${payment.numero}`}</td>
+                      <td className="font-semibold">
+                        {new Intl.NumberFormat('es-AR', { style: 'currency', currency: payment.moneda }).format(payment.monto)}
+                      </td>
+                      <td className={isOverdue ? 'text-red-600 font-semibold' : 'text-slate-600'}>
+                        {payment.fecha_vencimiento ? new Date(payment.fecha_vencimiento).toLocaleDateString('es-AR') : '—'}
+                        {isOverdue && ' (Vencido)'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

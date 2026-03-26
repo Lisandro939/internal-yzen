@@ -255,6 +255,14 @@ body {
   @apply bg-cyan-100 text-cyan-700;
 }
 
+.badge-danger {
+  @apply bg-red-100 text-red-700;
+}
+
+.badge-neutral {
+  @apply bg-slate-100 text-slate-600;
+}
+
 /* Table styles */
 .table-container {
   @apply overflow-x-auto;
